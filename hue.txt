@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-joaopauloehmachomesmo
-=======
-ojoaoehcabramacho
->>>>>>> origin/master
+joaocabramacho

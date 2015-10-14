@@ -9,13 +9,6 @@ typedef struct no_ld {
 	struct no_ld *prox, *ant;
 }  Tno_ld;
 
-typedef struct bloco_ab{
-    int frequencia;
-    char dado[256];
-    struct bloco_ab    *FilhoEsq, *FilhoDir;
-    struct bloco_ab    *Pai;  /* adicionalmente foi incluido o ponteiro para pai */
-} Nodo_AB;
-
 /*******************************************************/
 int Inicializar_LD(Tno_ld **inicio);
 int Inserir_fim_LD (Tno_ld **inicio, char info[256]);
@@ -24,15 +17,11 @@ int Procurar_dado (Tno_ld *inicio, char *dado);
 Tno_ld* addord(Tno_ld* t, float f, char n[256]);
 Tno_ld* ordenarlista(Tno_ld *inicio);
 int carrega(char *arq);
-int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char dado[256]);
-int  inicializa_arvbin (Nodo_AB **AB);
-void exibe_ab_prefixado (Nodo_AB *AB);
 /*******************************************************/
 
 /*******************************************************/
 FILE *imagem;
 Tno_ld *lista1;
-Nodo_AB *Arvore;
 /*******************************************************/
 
 void gotoxy( int x, int y ){
@@ -44,7 +33,6 @@ void gotoxy( int x, int y ){
 
 int main(){
     Inicializar_LD (&lista1);
-    inicializa_arvbin (&Arvore);
     char arq[256];
 	int erro,q;
 
@@ -55,15 +43,6 @@ int main(){
     system("pause");
     */
 
-    /*
-    insere_ord_arvbin(&Arvore, 1 , "1");
-    insere_ord_arvbin(&Arvore, 4 , "44");
-    insere_ord_arvbin(&Arvore, 3 , "33");
-    insere_ord_arvbin(&Arvore, 2 , "22");
-    printf("\nMostra Arvore: modo prefixado (pre-ordem)\n");
-    exibe_ab_prefixado(Arvore);
-    system("pause");
-    */
 
     do {
 	    system("cls");
@@ -89,9 +68,7 @@ int main(){
 					break;
 			case 2: erro=Listar_LD(lista1);
 			        break;
-			case 3: inicializa_arvbin (&Arvore);
-                    arvorehuffman();
-                    exibe_ab_prefixado(Arvore);
+			case 3: arvorehuffman();
                     system("pause");
 			        break;
 			case 4:
@@ -149,19 +126,15 @@ void arvorehuffman(){
 
     if (lista1->prox!=NULL){
         arvorehuffman();
-        //printf("Insere %s-%d\n",aux1,au1);
-        //printf("Insere %s-%d\n",aux2,au2);
-        //insere_ord_arvbin(&Arvore, au1 , aux1);
-        //insere_ord_arvbin(&Arvore, au2 , aux2);
+        printf("> Insere %s-%d\n",aux2,au2);
+        printf("> Insere %s-%d\n",aux1,au1);
     }
     else{
-        //printf("Insere %s-%d\n",lista1->dado,freq);
-        //printf("Insere %s-%d\n",aux1,au1);
-        //printf("Insere %s-%d\n",aux2,au2);
-        //insere_ord_arvbin(&Arvore, freq , lista1->dado);
-        //insere_ord_arvbin(&Arvore, au1 , aux1);
-        //insere_ord_arvbin(&Arvore, au2 , aux2);
+        printf("> Insere %s-%d\n",lista1->dado,freq);
+        printf("> Insere %s-%d\n",aux2,au2);
+        printf("> Insere %s-%d\n",aux1,au1);
     }
+    system("pause");
 }
 
 /***************** Lista ******************/
@@ -204,10 +177,10 @@ int Listar_LD (Tno_ld *inicio){
         return 1;  /* lista vazia */
 	}
 
-    printf("\nLISTA:\n");
+    printf("\n> LISTA:\n");
 	while (inicio != NULL) {
-		   printf("  Caractere:%s   ",inicio->dado);
-		   printf("  Frequencia:%d\n",inicio->frequencia);
+		   printf(" -Caractere:%2s   ",inicio->dado);
+		   printf(" Frequencia:%d\n",inicio->frequencia);
 		   inicio = inicio->prox;
     }
     printf("\n");
@@ -302,61 +275,5 @@ int Remover_inicio_LD (Tno_ld **inicio){
         free(aux);
         return 0;
     }
-}
-/******************************************/
-
-
-/************ Árvore **********************/
-int inicializa_arvbin (Nodo_AB **AB){
-  *AB = NULL;
-  return 0;
-}
-
-int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char dado[256]){
-   /* Arvore binaria onde os nodos sao inseridos de maneira ordenada:   */
-   /* - Os nodos a esquerda de um nodo pai sao sempre menores que ele   */
-   /* - Os nodos a direita de um nodo pai sao sempre maiores que ele    */
-
-    Nodo_AB *novo,  *aux, *temp;
-
-    novo = (Nodo_AB *) malloc (sizeof (Nodo_AB));
-    if ( novo == NULL ) return 0;
-
-    strcpy(novo -> dado , dado);
-    novo -> frequencia = frequencia;
-    novo -> FilhoEsq = NULL;
-    novo -> FilhoDir = NULL;
-    aux = *AB;
-
-    while( aux != NULL ) {
-      temp = aux;
-      if ( frequencia > (aux -> frequencia) )
-         aux = aux -> FilhoDir;                         /*  insere_ord_arvbin (aux -> FilhoDir, Dado)  */
-      else
-         aux = aux -> FilhoEsq;                         /*  insere_ord_arvbin (aux -> FilhoEsq, Dado)  */
-   }
-
-    if( aux == *AB){
-      novo -> Pai = NULL;
-      *AB = novo;
-   }
-
-    else {
-      novo -> Pai = temp;
-      if (frequencia > temp->frequencia)
-          temp -> FilhoDir = novo;
-      else
-          temp -> FilhoEsq = novo;
-   }
-    return 1;
-}
-
-void exibe_ab_prefixado (Nodo_AB *AB){
-   if ( AB != NULL )
-   {
-      printf ("%s - %d\n", AB -> dado, AB -> frequencia);
-      exibe_ab_prefixado ( AB -> FilhoEsq );
-      exibe_ab_prefixado ( AB -> FilhoDir);
-   }
 }
 /******************************************/

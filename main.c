@@ -11,11 +11,10 @@ typedef struct no_ld {
 
 typedef struct bloco_ab{
     int frequencia;
-    char *dado;
+    char dado[256];
     struct bloco_ab    *FilhoEsq, *FilhoDir;
     struct bloco_ab    *Pai;  /* adicionalmente foi incluido o ponteiro para pai */
 } Nodo_AB;
-
 
 /*******************************************************/
 int Inicializar_LD(Tno_ld **inicio);
@@ -25,7 +24,7 @@ int Procurar_dado (Tno_ld *inicio, char *dado);
 Tno_ld* addord(Tno_ld* t, float f, char n[256]);
 Tno_ld* ordenarlista(Tno_ld *inicio);
 int carrega(char *arq);
-int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char *dado);
+int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char dado[256]);
 int  inicializa_arvbin (Nodo_AB **AB);
 void exibe_ab_prefixado (Nodo_AB *AB);
 /*******************************************************/
@@ -73,8 +72,9 @@ int main(){
 		gotoxy(0,5);
 		printf("1. Carregar Arquivo \n");
 		printf("2. Exibir Lista de ocorrencias \n");
-		printf("3.  \n");
-		printf("4.  \n");
+		printf("3. Criar arvore de huffman \n");
+		printf("4. Exibir lista de criptografia \n");
+		printf("5. Criptografar dados \n");
 		printf("9. Sair \n");
 		printf("\n> ");
 		scanf("%d", &q);     /* Ler a opcao do usuario */
@@ -89,9 +89,14 @@ int main(){
 					break;
 			case 2: erro=Listar_LD(lista1);
 			        break;
-			case 3:
+			case 3: inicializa_arvbin (&Arvore);
+                    arvorehuffman();
+                    exibe_ab_prefixado(Arvore);
+                    system("pause");
 			        break;
 			case 4:
+			        break;
+			case 5:
 			        break;
 			case 9: break;
 			default: printf("\n\n Opcao nao valida");
@@ -128,7 +133,35 @@ void lfrequencia(){
 }
 
 void arvorehuffman(){
+    int au1,au2,au3;
+    char aux1[256],aux2[256],aux3[256];
+    strcpy(aux1,(lista1->dado));
+    au1=lista1->frequencia;
+    strcpy(aux2,(lista1->prox)->dado);
+    au2=(lista1->prox)->frequencia;
+    strcpy(aux3,(lista1->dado));
+    au3=lista1->frequencia;
+    strcat(aux3,aux2);
+    int freq=(lista1->frequencia+(lista1->prox)->frequencia);
+    lista1=addord(lista1, freq, aux3);
+    Remover_inicio_LD (&lista1);
+    Remover_inicio_LD (&lista1);
 
+    if (lista1->prox!=NULL){
+        arvorehuffman();
+        //printf("Insere %s-%d\n",aux1,au1);
+        //printf("Insere %s-%d\n",aux2,au2);
+        //insere_ord_arvbin(&Arvore, au1 , aux1);
+        //insere_ord_arvbin(&Arvore, au2 , aux2);
+    }
+    else{
+        //printf("Insere %s-%d\n",lista1->dado,freq);
+        //printf("Insere %s-%d\n",aux1,au1);
+        //printf("Insere %s-%d\n",aux2,au2);
+        //insere_ord_arvbin(&Arvore, freq , lista1->dado);
+        //insere_ord_arvbin(&Arvore, au1 , aux1);
+        //insere_ord_arvbin(&Arvore, au2 , aux2);
+    }
 }
 
 /***************** Lista ******************/
@@ -279,7 +312,7 @@ int inicializa_arvbin (Nodo_AB **AB){
   return 0;
 }
 
-int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char *dado){
+int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char dado[256]){
    /* Arvore binaria onde os nodos sao inseridos de maneira ordenada:   */
    /* - Os nodos a esquerda de um nodo pai sao sempre menores que ele   */
    /* - Os nodos a direita de um nodo pai sao sempre maiores que ele    */
@@ -287,9 +320,9 @@ int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char *dado){
     Nodo_AB *novo,  *aux, *temp;
 
     novo = (Nodo_AB *) malloc (sizeof (Nodo_AB));
-    if ( novo == NULL ) return (0);
+    if ( novo == NULL ) return 0;
 
-    novo -> dado = dado;
+    strcpy(novo -> dado , dado);
     novo -> frequencia = frequencia;
     novo -> FilhoEsq = NULL;
     novo -> FilhoDir = NULL;
@@ -315,7 +348,7 @@ int insere_ord_arvbin (Nodo_AB **AB, int frequencia, char *dado){
       else
           temp -> FilhoEsq = novo;
    }
-    return(1);
+    return 1;
 }
 
 void exibe_ab_prefixado (Nodo_AB *AB){

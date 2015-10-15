@@ -5,6 +5,7 @@
 
 typedef struct no_ld {
 	char dado[256];
+	char cripto[256];
 	int frequencia;
 	struct no_ld *prox, *ant;
 }  Tno_ld;
@@ -22,6 +23,7 @@ int carrega(char *arq);
 /*******************************************************/
 FILE *imagem;
 Tno_ld *lista1;
+Tno_ld *lista2;
 /*******************************************************/
 
 void gotoxy( int x, int y ){
@@ -34,15 +36,16 @@ void gotoxy( int x, int y ){
 int main(){
     Inicializar_LD (&lista1);
     char arq[256];
-	int erro,q;
+	int erro,opt;
 
     /*
-    char a[10]="abcde",b[10]="abcde";
-    erro=strcmp(a,b);
-    printf("%d\n\n",erro);
-    system("pause");
+    char a[10]="abcde";
+    int i=0;
+    while (a[i]!=NULL){
+        printf("%d - %c\n",i,a[i]);
+        i++;
+    }
     */
-
 
     do {
 	    system("cls");
@@ -56,8 +59,8 @@ int main(){
 		printf("5. Criptografar dados \n");
 		printf("9. Sair \n");
 		printf("\n> ");
-		scanf("%d", &q);     /* Ler a opcao do usuario */
-		switch(q) {
+		scanf("%d", &opt);
+		switch(opt) {
 			case 1: printf("> Qual o nome do arquivo a ser comprimido?\n> ");
                     scanf("%s",arq);
                     erro=carrega(arq);
@@ -68,19 +71,20 @@ int main(){
 					break;
 			case 2: erro=Listar_LD(lista1);
 			        break;
-			case 3: arvorehuffman();
-                    system("pause");
+			case 3: lista2=ordenarlista(lista1); //copia de lista1
+                    arvorehuffman();
 			        break;
-			case 4:
+			case 4: erro=Listar_LD(lista2);
 			        break;
-			case 5:
+			case 5: printf("> Qual o nome do arquivo de saida?\n> ");
+                    scanf("%s",arq);
 			        break;
 			case 9: break;
 			default: printf("\n\n Opcao nao valida");
 		}
 		getchar();
 	}
-	while ( (q != 9) );
+	while ( (opt != 9) );
 
 
     return 0;
@@ -110,6 +114,11 @@ void lfrequencia(){
 }
 
 void arvorehuffman(){
+    if (lista1==NULL){
+        printf("Arquivo nao carregado ou Lista Vazia\n");
+        return 0;
+    }
+
     int au1,au2,au3;
     char aux1[256],aux2[256],aux3[256];
     strcpy(aux1,(lista1->dado));
@@ -126,15 +135,58 @@ void arvorehuffman(){
 
     if (lista1->prox!=NULL){
         arvorehuffman();
-        printf("> Insere %s-%d\n",aux2,au2);
-        printf("> Insere %s-%d\n",aux1,au1);
+        printf("> Insere esquerda %s-%d\n",aux2,au2);
+        insereesq(lista2,aux2);
+        printf("> Insere direita %s-%d\n",aux1,au1);
+        inseredir(lista2,aux1);
     }
     else{
-        printf("> Insere %s-%d\n",lista1->dado,freq);
-        printf("> Insere %s-%d\n",aux2,au2);
-        printf("> Insere %s-%d\n",aux1,au1);
+        printf("> Raiz %s-%d\n",lista1->dado,freq);
+        printf("> Insere esquerda %s-%d\n",aux2,au2);
+        insereesq(lista2,aux2);
+        printf("> Insere direita %s-%d\n",aux1,au1);
+        inseredir(lista2,aux1);
     }
-    system("pause");
+}
+
+void insereesq(Tno_ld *inicio,char *dadocompleto){
+	if (inicio == NULL)
+        return 0;
+    int i=0;
+    char aux[10];
+
+    while(dadocompleto[i]!=NULL){
+        aux[0]=dadocompleto[i];
+        while (inicio != NULL) {
+            if( strcmp(aux , (inicio->dado))==0 ){
+                strcat(inicio->cripto,"1");
+            }
+            inicio = inicio->prox;
+        }
+        inicio=lista2;
+        i++;
+    }
+    return 0;
+}
+
+void inseredir(Tno_ld *inicio,char *dadocompleto){
+	if (inicio == NULL)
+        return 0;
+    int i=0;
+    char aux[10];
+
+    while(dadocompleto[i]!=NULL){
+        aux[0]=dadocompleto[i];
+        while (inicio != NULL) {
+            if( strcmp(aux , (inicio->dado))==0 ){
+                strcat(inicio->cripto,"0");
+            }
+            inicio = inicio->prox;
+        }
+        inicio=lista2;
+        i++;
+    }
+    return 0;
 }
 
 /***************** Lista ******************/
@@ -149,6 +201,7 @@ int Inserir_fim_LD (Tno_ld **inicio, char info[256]){
     /* Criacao do novo no - Aloca��o de memoria */
     no_novo = (Tno_ld *) malloc(sizeof(Tno_ld));
     strcpy(no_novo -> dado, info);
+    strcpy(no_novo->cripto, "");
     no_novo -> frequencia = 1;
     no_novo -> prox = NULL;
 
@@ -180,7 +233,8 @@ int Listar_LD (Tno_ld *inicio){
     printf("\n> LISTA:\n");
 	while (inicio != NULL) {
 		   printf(" -Caractere:%2s   ",inicio->dado);
-		   printf(" Frequencia:%d\n",inicio->frequencia);
+		   printf(" Frequencia:%4d   ",inicio->frequencia);
+		   printf(" Cripto:%s\n",inicio->cripto);
 		   inicio = inicio->prox;
     }
     printf("\n");
@@ -208,6 +262,7 @@ Tno_ld* addord(Tno_ld* t, float f, char n[256]){
     int controle=0;
 
     strcpy(novo_no->dado, n);
+    strcpy(novo_no->cripto, "");
     novo_no->frequencia = f;
 
     /*-------------------------------INSERE INICIO--------------------------------*/

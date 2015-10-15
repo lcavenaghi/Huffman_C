@@ -18,12 +18,16 @@ int Procurar_dado (Tno_ld *inicio, char *dado);
 Tno_ld* addord(Tno_ld* t, float f, char n[256]);
 Tno_ld* ordenarlista(Tno_ld *inicio);
 int carrega(char *arq);
+int carrega2(char *arq);
+void converte(Tno_ld *inicio, char *dado);
 /*******************************************************/
 
 /*******************************************************/
 FILE *imagem;
+FILE *saida;
 Tno_ld *lista1;
 Tno_ld *lista2;
+char cript[256]=" ";
 /*******************************************************/
 
 void gotoxy( int x, int y ){
@@ -37,15 +41,7 @@ int main(){
     Inicializar_LD (&lista1);
     char arq[256];
 	int erro,opt;
-
-    /*
-    char a[10]="abcde";
-    int i=0;
-    while (a[i]!=NULL){
-        printf("%d - %c\n",i,a[i]);
-        i++;
-    }
-    */
+	int arvorizado=0;
 
     do {
 	    system("cls");
@@ -57,6 +53,7 @@ int main(){
 		printf("3. Criar arvore de huffman \n");
 		printf("4. Exibir lista de criptografia \n");
 		printf("5. Criptografar dados \n");
+		printf("6. Descriptografar dados \n");
 		printf("9. Sair \n");
 		printf("\n> ");
 		scanf("%d", &opt);
@@ -68,17 +65,38 @@ int main(){
                         lfrequencia();
                         lista1=ordenarlista(lista1);
                     }
+                    fclose(imagem);
 					break;
 			case 2: erro=Listar_LD(lista1);
 			        break;
-			case 3: lista2=ordenarlista(lista1); //copia de lista1
-                    arvorehuffman();
+			case 3: if(arvorizado==0){
+                        lista2=ordenarlista(lista1); //copia de lista1
+                        arvorizado=arvorehuffman();
+                    }
+                    else{
+                        printf("Ja foi criado\n");
+                        system("pause");
+                    }
 			        break;
 			case 4: erro=Listar_LD(lista2);
 			        break;
-			case 5: printf("> Qual o nome do arquivo de saida?\n> ");
-                    scanf("%s",arq);
+			case 5: if(arvorizado==0){
+                        printf("Nao existe lista de conversao ainda!\n");
+                        system("pause");
+                    }
+                    else{
+                        printf("> Qual o nome do arquivo de saida?\n> ");
+                        erro=carrega(arq);
+                        scanf("%s",arq);
+                        erro=carrega2(arq);
+                        criptografa(arq);
+                        fclose(saida);
+                        fclose(imagem);
+                    }
 			        break;
+			case 6:
+
+                    break;
 			case 9: break;
 			default: printf("\n\n Opcao nao valida");
 		}
@@ -86,13 +104,21 @@ int main(){
 	}
 	while ( (opt != 9) );
 
-
     return 0;
 }
 
 int carrega(char *arq){
     if ((imagem = fopen(arq, "r")) == NULL) {
         printf("Arquivo corrompido ou apagado -- %s\n",arq);
+        system("pause");
+        return 1;
+    }
+    return 0;
+}
+
+int carrega2(char *arq){
+    if ((saida = fopen(arq, "w")) == NULL) {
+        printf("Arquivo nao pode ser criado -- %s\n",arq);
         system("pause");
         return 1;
     }
@@ -113,9 +139,10 @@ void lfrequencia(){
     }
 }
 
-void arvorehuffman(){
+int arvorehuffman(){
     if (lista1==NULL){
         printf("Arquivo nao carregado ou Lista Vazia\n");
+        system("pause");
         return 0;
     }
 
@@ -147,6 +174,8 @@ void arvorehuffman(){
         printf("> Insere direita %s-%d\n",aux1,au1);
         inseredir(lista2,aux1);
     }
+
+    return 1;
 }
 
 void insereesq(Tno_ld *inicio,char *dadocompleto){
@@ -185,6 +214,29 @@ void inseredir(Tno_ld *inicio,char *dadocompleto){
         }
         inicio=lista2;
         i++;
+    }
+    return 0;
+}
+
+void criptografa(){
+    char aux2[256]="0";
+    char *aux=aux2;
+
+    printf("Convertendo dados\n");
+    _sleep(10);
+
+    while( (fscanf(imagem,"%1s", aux))!=EOF ){
+        converte(lista2,aux);
+    }
+    system("pause");
+}
+
+void converte(Tno_ld *inicio, char *dado){
+	while (inicio != NULL) {
+        if( strcmp(dado , (inicio->dado))==0 ){
+            fprintf(saida, "%s", inicio->cripto);
+        }
+        inicio = inicio->prox;
     }
     return 0;
 }

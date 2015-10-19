@@ -15,19 +15,29 @@ int Inicializar_LD(Tno_ld **inicio);
 int Inserir_fim_LD (Tno_ld **inicio, char info[256]);
 int Listar_LD (Tno_ld *inicio);
 int Procurar_dado (Tno_ld *inicio, char *dado);
+int Procurar_cripto (Tno_ld *inicio);
 Tno_ld* addord(Tno_ld* t, float f, char n[256]);
 Tno_ld* ordenarlista(Tno_ld *inicio);
 int carrega(char *arq);
 int carrega2(char *arq);
 void converte(Tno_ld *inicio, char *dado);
+void displayBits(char value);
+void displayBits2(char value);
 /*******************************************************/
 
 /*******************************************************/
 FILE *imagem;
 FILE *saida;
+FILE *criptografado;
+FILE *descriptografado;
 Tno_ld *lista1;
 Tno_ld *lista2;
 char cript[256]=" ";
+char encriptado=NULL;
+char descrip[256]="";
+int bits=0;
+int totalbits=0;
+int totalbits2=0;
 /*******************************************************/
 
 void gotoxy( int x, int y ){
@@ -39,9 +49,10 @@ void gotoxy( int x, int y ){
 
 int main(){
     Inicializar_LD (&lista1);
-    char arq[256];
+    char arq[256],arq2[256];
 	int erro,opt;
 	int arvorizado=0;
+
 
     do {
 	    system("cls");
@@ -94,8 +105,13 @@ int main(){
                         fclose(imagem);
                     }
 			        break;
-			case 6:
-
+			case 6: printf("> Qual o nome do arquivo comprimido?\n> ");
+                    scanf("%s",arq);
+                    printf("> Qual o nome do arquivo de saida?\n> ");
+                    scanf("%s",arq2);
+                    erro=descriptografa(arq,arq2);
+                    fclose(criptografado);
+                    fclose(descriptografado);
                     break;
 			case 9: break;
 			default: printf("\n\n Opcao nao valida");
@@ -162,16 +178,12 @@ int arvorehuffman(){
 
     if (lista1->prox!=NULL){
         arvorehuffman();
-        printf("> Insere esquerda %s-%d\n",aux2,au2);
         insereesq(lista2,aux2);
-        printf("> Insere direita %s-%d\n",aux1,au1);
         inseredir(lista2,aux1);
     }
     else{
         printf("> Raiz %s-%d\n",lista1->dado,freq);
-        printf("> Insere esquerda %s-%d\n",aux2,au2);
         insereesq(lista2,aux2);
-        printf("> Insere direita %s-%d\n",aux1,au1);
         inseredir(lista2,aux1);
     }
 
@@ -228,16 +240,69 @@ void criptografa(){
     while( (fscanf(imagem,"%1s", aux))!=EOF ){
         converte(lista2,aux);
     }
+    printf("Resto(%d)=",bits);
+    if(bits>0){
+        encriptado<<=(8-bits);
+        displayBits(encriptado);
+        fprintf(saida, "%c", encriptado);
+    }
+
+    printf("Total de bits=%d\n\n",totalbits);
     system("pause");
 }
 
 void converte(Tno_ld *inicio, char *dado){
+    int i;
+    char aux;
 	while (inicio != NULL) {
         if( strcmp(dado , (inicio->dado))==0 ){
-            fprintf(saida, "%s", inicio->cripto);
+            i=0;
+            while(inicio->cripto[i]!=NULL){
+                if(bits==8){
+                    bits=0;
+                    displayBits(encriptado);
+                    fprintf(saida, "%c", encriptado);
+                    encriptado=NULL;
+                }
+
+                if (inicio->cripto[i]=='0')
+                    aux=0x00;
+                if (inicio->cripto[i]=='1')
+                    aux=0x01;
+                encriptado<<=1;
+                encriptado=encriptado|aux;
+                bits++;
+                totalbits++;
+                //printf("%c\n", inicio->cripto[i]);
+                i++;
+            }
         }
         inicio = inicio->prox;
     }
+    return 0;
+}
+
+int descriptografa(char *arq, char *arq2){
+    if ((descriptografado = fopen(arq2, "w")) == NULL) {
+        printf("Arquivo nao pode ser criado -- %s\n",arq2);
+        system("pause");
+        return 1;
+    }
+
+    if ((criptografado = fopen(arq, "r")) == NULL){
+        printf("Arquivo corrompido ou apagado -- %s\n",arq);
+        system("pause");
+        return 1;
+    }
+
+
+    char aux;
+    while( (fscanf(criptografado,"%c", &aux))!=EOF ){
+        //printf("%c",aux);
+        displayBits2(aux);
+    }
+    printf("\n");
+    system("pause");
     return 0;
 }
 
@@ -381,6 +446,48 @@ int Remover_inicio_LD (Tno_ld **inicio){
         (*inicio)->ant = NULL;
         free(aux);
         return 0;
+    }
+}
+/******************************************/
+
+/*************** Bits *********************/
+void displayBits(char value){
+    unsigned c;
+    unsigned displayMask = 1 << 8;
+    for(c=1;c<=8;c++){
+        //putchar(value & displayMask ?'1':'0');
+        value <<= 1;
+    }
+    //putchar('\n');
+}
+
+void displayBits2(char value){
+    int i,achou;
+    unsigned displayMask = 1 << 8;
+    char auxiliar[1];
+    Tno_ld* p;
+
+
+    //printf("%c - %d = ",value,value);
+    for(i=1;i<=8;i++){
+        auxiliar[0]=(value & displayMask ?'1':'0');
+        strcat(descrip,auxiliar);
+
+        //achou=Procurar_cripto (lista2);
+        p=lista2;
+        while (p != NULL) {
+            if( strcmp(descrip , (p->cripto))==0 ){
+                //printf("%s",p->dado);
+                fprintf(descriptografado, "%s", p->dado);
+                strcpy(descrip,"");
+                break;
+            }
+            p = p->prox;
+        }
+        totalbits2++;
+        if (totalbits2==totalbits)
+            break;
+        value <<= 1;
     }
 }
 /******************************************/

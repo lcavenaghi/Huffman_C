@@ -49,10 +49,10 @@ void gotoxy( int x, int y ){
 
 int main(){
     Inicializar_LD (&lista1);
+    Inicializar_LD (&lista2);
     char arq[256],arq2[256];
 	int erro,opt;
 	int arvorizado=0;
-
 
     do {
 	    system("cls");
@@ -60,11 +60,9 @@ int main(){
 		gotoxy(0,3); printf("Opcoes:");
 		gotoxy(0,5);
 		printf("1. Carregar Arquivo \n");
-		printf("2. Exibir Lista de ocorrencias \n");
-		printf("3. Criar arvore de huffman \n");
-		printf("4. Exibir lista de criptografia \n");
-		printf("5. Criptografar dados \n");
-		printf("6. Descriptografar dados \n");
+		printf("2. Comprimir dados \n");
+		printf("3. Descomprimir dados \n");
+		printf("8. Exibir lista de criptografia \n");
 		printf("9. Sair \n");
 		printf("\n> ");
 		scanf("%d", &opt);
@@ -76,11 +74,7 @@ int main(){
                         lfrequencia();
                         lista1=ordenarlista(lista1);
                     }
-                    fclose(imagem);
-					break;
-			case 2: erro=Listar_LD(lista1);
-			        break;
-			case 3: if(arvorizado==0){
+                    if(arvorizado==0){
                         lista2=ordenarlista(lista1); //copia de lista1
                         arvorizado=arvorehuffman();
                     }
@@ -88,11 +82,10 @@ int main(){
                         printf("Ja foi criado\n");
                         system("pause");
                     }
-			        break;
-			case 4: erro=Listar_LD(lista2);
-			        break;
-			case 5: if(arvorizado==0){
-                        printf("Nao existe lista de conversao ainda!\n");
+                    fclose(imagem);
+					break;
+			case 2: if(arvorizado==0){
+                        printf("Ainda nao existe lista de conversao\n");
                         system("pause");
                     }
                     else{
@@ -105,7 +98,7 @@ int main(){
                         fclose(imagem);
                     }
 			        break;
-			case 6: printf("> Qual o nome do arquivo comprimido?\n> ");
+			case 3: printf("> Qual o nome do arquivo comprimido?\n> ");
                     scanf("%s",arq);
                     printf("> Qual o nome do arquivo de saida?\n> ");
                     scanf("%s",arq2);
@@ -113,6 +106,8 @@ int main(){
                     fclose(criptografado);
                     fclose(descriptografado);
                     break;
+            case 8: erro=Listar_LD(lista2);
+			        break;
 			case 9: break;
 			default: printf("\n\n Opcao nao valida");
 		}
@@ -124,7 +119,7 @@ int main(){
 }
 
 int carrega(char *arq){
-    if ((imagem = fopen(arq, "r")) == NULL) {
+    if ((imagem = fopen(arq, "rb")) == NULL) {
         printf("Arquivo corrompido ou apagado -- %s\n",arq);
         system("pause");
         return 1;
@@ -133,7 +128,7 @@ int carrega(char *arq){
 }
 
 int carrega2(char *arq){
-    if ((saida = fopen(arq, "w")) == NULL) {
+    if ((saida = fopen(arq, "wb")) == NULL) {
         printf("Arquivo nao pode ser criado -- %s\n",arq);
         system("pause");
         return 1;
@@ -147,7 +142,7 @@ void lfrequencia(){
     char *aux=lixo;
 
     int existe=0;
-    while( (fscanf(imagem,"%1s", aux))!=EOF ){
+    while( (fgets (aux, 2, imagem))!=0 ){
         existe=Procurar_dado (lista1,aux);
         if (existe==0){
             Inserir_fim_LD (&lista1, aux );
@@ -237,7 +232,7 @@ void criptografa(){
     printf("Convertendo dados\n");
     _sleep(10);
 
-    while( (fscanf(imagem,"%1s", aux))!=EOF ){
+    while( (fgets (aux, 2, imagem))!=0){
         converte(lista2,aux);
     }
     printf("Resto(%d)=",bits);
@@ -283,24 +278,39 @@ void converte(Tno_ld *inicio, char *dado){
 }
 
 int descriptografa(char *arq, char *arq2){
-    if ((descriptografado = fopen(arq2, "w")) == NULL) {
+    if ((descriptografado = fopen(arq2, "wb")) == NULL) {
         printf("Arquivo nao pode ser criado -- %s\n",arq2);
         system("pause");
         return 1;
     }
 
-    if ((criptografado = fopen(arq, "r")) == NULL){
+    if ((criptografado = fopen(arq, "rb")) == NULL){
         printf("Arquivo corrompido ou apagado -- %s\n",arq);
         system("pause");
         return 1;
     }
 
-
+    /*
+    int i=0;
     char aux;
-    while( (fscanf(criptografado,"%c", &aux))!=EOF ){
-        //printf("%c",aux);
-        displayBits2(aux);
+    while( (aux = fgetc(criptografado)) != EOF){
+        i++;
+        printf("%d Dado- %c\n",i,aux);
+        //displayBits2(aux);
     }
+    */
+
+
+    char aux2;
+    char aux[2];
+    while( (fgets (aux, 2, criptografado))!=0 ){
+        aux2=aux[0];
+        displayBits2(aux2);
+        //printf("%c", aux2);
+    }
+
+
+
     printf("\n");
     system("pause");
     return 0;
@@ -467,7 +477,6 @@ void displayBits2(char value){
     char auxiliar[1];
     Tno_ld* p;
 
-
     //printf("%c - %d = ",value,value);
     for(i=1;i<=8;i++){
         auxiliar[0]=(value & displayMask ?'1':'0');
@@ -477,16 +486,17 @@ void displayBits2(char value){
         p=lista2;
         while (p != NULL) {
             if( strcmp(descrip , (p->cripto))==0 ){
-                //printf("%s",p->dado);
+                //printf("Imprimindo %s dado<%d> de <%d>\n", p->dado,totalbits2,totalbits);
                 fprintf(descriptografado, "%s", p->dado);
                 strcpy(descrip,"");
                 break;
             }
+            if (totalbits2>=totalbits)
+                break;
             p = p->prox;
         }
         totalbits2++;
-        if (totalbits2==totalbits)
-            break;
+
         value <<= 1;
     }
 }

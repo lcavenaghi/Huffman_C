@@ -36,8 +36,8 @@ char cript[256]=" ";
 char encriptado=NULL;
 char descrip[256]="";
 int bits=0;
-int totalbits=0;
-int totalbits2=0;
+unsigned long long int totalbits=0;
+unsigned long long int totalbits2=0;
 /*******************************************************/
 
 void gotoxy( int x, int y ){
@@ -242,7 +242,7 @@ void criptografa(){
         fprintf(saida, "%c", encriptado);
     }
 
-    printf("Total de bits=%d\n\n",totalbits);
+    printf("Total de bits=%llu\n\n",totalbits);
     system("pause");
 }
 

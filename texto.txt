@@ -1,97 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-int main()
-{
-    FILE *fl;
-    int c;
-
-    if((fl = fopen("caminho/do/arquivo", "r")) == NULL)
-    {
-        perror("Erro: fopen");
-        exit(EXIT_FAILURE);
-    }
-
-    while((c = fgetc(fl)) != EOF)
-        printf("Caractere lido: %c\n", c);
-
-    if((c == EOF) && (feof(fl) == 0) && (ferror(fl) != 0))
-        perror("Erro: fgetc");
-        
-
-    fclose(fl);
-    return EXIT_SUCCESS;
-}
-fgets[editar | editar código-fonte]
-Ao chamar a função fgets(), você deve fornecer o ponteiro para a string onde os dados lidos devem ser guardados, além do tamanho máximo dos dados a serem lidos (para que a memória reservada à string não seja ultrapassada).
-Para se ler uma string num arquivo podemos usar fgets() cujo protótipo é:
-
-char *fgets (char *str, int tamanho,FILE *fp);
-A função recebe 3 argumentos: a string a ser lida, o limite máximo de caracteres a serem lidos e o ponteiro para FILE, que está associado ao arquivo de onde a string será lida. A função lê a string até que um caracter de nova linha seja lido ou tamanho-1 caracteres tenham sido lidos. Se o caracter de nova linha ('\n') for lido, ele fará parte da string, o que não acontecia com gets.
-
-A função fgets é semelhante à função gets(), porém, além dela poder fazer a leitura a partir de um arquivo de dados e incluir o caracter de nova linha na string, ela ainda especifica o tamanho máximo da string de entrada. Como vimos, a função gets não tinha este controle, o que poderia acarretar erros de "estouro de buffer". Portanto, levando em conta que o ponteiro fp pode ser substituído por stdin, como vimos acima, uma alternativa ao uso de gets é usar a seguinte construção:
-
-fgets (str, tamanho, stdin);
-fscanf[editar | editar código-fonte]
-Sintaxe quase igual à de scanf(); só é necessário adicionar o identificador de fluxo no início.
-fscanf[editar | editar código-fonte]
-A função fscanf() funciona como a função scanf(). A diferença é que fscanf() lê de um arquivo e não do teclado do computador. Protótipo:
-
-int fscanf (FILE *fp,char *str,...);
-#include <stdio.h>
-#include <stdlib.h>
-int main()
-{
-   FILE *p;
-   char str[80],c;
-   printf("\n\n Entre com um nome para o arquivo:\n");       /* Le um nome para o arquivo a ser aberto: */
-   gets(str);
-   if (!(p = fopen(str,"w")))  		                     /* Caso ocorra algum erro na abertura do arquivo..*/ 
-     {                           		             /* o programa aborta automaticamente */
-        printf("Erro! Impossivel abrir o arquivo!\n");
-        exit(1);
-     }
-   fprintf(p,"Este e um arquivo chamado:\n%s\n", str);
-   fclose(p);                                                /* Se nao houve erro, imprime no arquivo, fecha ...*/
-   p = fopen(str,"r");                                 /* abre novamente para a leitura  */
-   while (!feof(p))
-    {
-       fscanf(p,"%c",&c);
-       printf("%c",c);
-    } 
-   fclose(p);
-   return 0;
-}
-fread[editar | editar código-fonte]
-Essa função envolve os conceitos de ponteiro e vetor, que só serão abordados mais tarde.
-Podemos escrever e ler blocos de dados. Para tanto, temos as funções fread() e fwrite(). O protótipo de fread() é:
-
- unsigned fread (void *buffer, int numero_de_bytes, int count, FILE *fp);
-O buffer é a região de memória na qual serão armazenados os dados lidos. O número de bytes é o tamanho da unidade a ser lida. count indica quantas unidades devem ser lidas. Isto significa que o número total de bytes lidos é:
-
-numero_de_bytes*count
-A função retorna o número de unidades efetivamente lidas. Este número pode ser menor que count quando o fim do arquivo for encontrado ou ocorrer algum erro.
-
-Quando o arquivo for aberto para dados binários, fread pode ler qualquer tipo de dados.
-
-Movendo pelo arquivo[editar | editar código-fonte]
-fseek[editar | editar código-fonte]
-Para se fazer procuras e acessos randômicos em arquivos usa-se a função fseek(). Esta move a posição corrente de leitura ou escrita no arquivo de um valor especificado, a partir de um ponto especificado. Seu protótipo é:
-
-int fseek (FILE *fp, long numbytes, int origem);
-O parâmetro origem determina a partir de onde os numbytes de movimentação serão contados. Os valores possíveis são definidos por macros em stdio.h e são:
-
-Nome         Valor   Significado
-SEEK_SET        0       Início do arquivo
-SEEK_CUR        1       Ponto corrente no arquivo
-SEEK_END        2       Fim do arquivo
-Tendo-se definido a partir de onde irá se contar, numbytes determina quantos bytes de deslocamento serão dados na posição atual.
-
-rewind[editar | editar código-fonte]
-Volta para o começo do arquivo de um fluxo
-
-feof[editar | editar código-fonte]
-EOF ("End of file") indica o fim de um arquivo. Às vezes, é necessário verificar se um arquivo chegou ao fim. Para isto podemos usar a função feof(). Ela retorna não-zero se o arquivo chegou ao EOF, caso contrário retorna zero. Seu protótipo é:
-
-int feof (FILE *fp);
-Outra forma de se verificar se o final do arquivo foi atingido é comparar o caractere lido por getc com EOF. O programa a seguir abre um arquivo já existente e o lê, caracter por caracter, até que o final do arquivo seja atingido. Os caracteres lidos são apresentados na tela:
+Programação C/C++ - Arquivos
+www.inf.pucrs.br/~pinho/LaproI/Arquivos/ArquivosBinarios.htm
+Para tanto, a linguagem C possui o comando fopen. ... "wb": abertura para gravação, arquivo binário ... Para leitura de arquivos texto usa-se a função fread.
+Você visitou esta página em 15/10/15.
+[PDF]Aula 27 Arquivos Binários Arquivos Binários Arquivos Binários
+www.ic.unicamp.br/~cmartins/Cursos/mc102/.../mc102z-a27-4pp.pdf
+linguagem C, da mesma forma que com arquivo ... stdlib.h. Obs: arquivos binários usam normalmente a extensão .dat .... Como ler registros não seqüenciais?
+Arquivo binário em C++ | Comunidade do Hardware
+www.hardware.com.br/comunidade/arquivo-binario/1246240/
+5 de ago de 2012 - Procuro na internet mas só vejo exemplos de arquivo binário em C. Gostaria ... Leitura de arquivo banário em c ou c++ é o mesmo processo.
+Arquivos binários em C | Dieison Soares Silveira
+https://dieisonsilveira.wordpress.com/.../cc/arquivos-binarios-em-c/
+No código a seguir é explicado como abrir arquivos em modo binário e carregá-los na ... Arquivos binários em C ... //Primeira maneira é ler byte a byte a matriz.
+[PDF]Manipulação de Arquivos Binários - DCM
+dcm.ffclrp.usp.br/~augusto/teaching/ici/Arquivos-Binarios-CPP.pdf
+Como vimos em aulas anteriores, C++ não impõe estrutura para arquivos. Assim, a aplicação .... Ao ler um registro, o ponteiro de arquivo é automaticamente.
+Dicas C – Parte 1 – Arquivos binários | Blog do Gurgel
+www.paulogurgel.com.br/blog/?p=28
+20 de mai de 2011 - Dicas C – Parte 1 – Arquivos binários. Posted on ... Para ler um arquivo binário byte à byte (atencao ao parametro read binary do fopen): ?
+[PDF]Manipulação de Arquivo Binário em Linguagem C - Edwar ...
+www.esj.eti.br/...C/Linguagem_C_ManipulacaoArquivosBinarios.pdf
+Programação de Computadores - Linguagem C. Prof. Edwar Saliba Júnior. Manipulação de Arquivo Binário em Linguagem C. Exemplo de Software.
+Abrindo arquivo binário para leitura - YouTube
+Vídeo para ler arquivos binários em c? 10:40
+https://www.youtube.com/watch?v=AUdocezNzUE
+31 de jul de 2012 - Vídeo enviado por José Alberto Matioli
+Mostra como abrir um arquivo no formato binário para leitura dos dados. ... E o tipo char em linguagem C corresponde a 1 byte. Read more  ...
+Escrever e Ler registros de arquivo Binario em C++ - C/C++ - Fórum ...
+forum.imasters.com.br › Programação › C/C++
+28 de jul de 2014 - Escrever e Ler registros de arquivo Binario em C++ - posted in C/C++: Bom pessoal estou com um problema um tanto chato. tenho que criar ...
+Curso de C
+mtm.ufsc.br/~azeredo/cursoC/aulas/c950.html
+É usando este tipo de ponteiro que vamos poder manipular arquivos no C. ... Poderíamos então, para abrir um arquivo binário para escrita, escrever: ... Uma vez aberto um arquivo, vamos poder ler ou escrever nele utilizando as funções que  ..
